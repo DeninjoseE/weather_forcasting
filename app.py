@@ -16,17 +16,17 @@ with st.container():
     col1, col2 = st.columns(2)
 
     with col1:
-        mean_temp = st.number_input('Mean Temperature (°C)', value=25.0)
-        max_temp = st.number_input('Maximum Temperature (°C)', value=30.0)
-        min_temp = st.number_input('Minimum Temperature (°C)', value=20.0)
-        dew_point = st.number_input('Dew Point (°C)', value=15.0)
-        humidity = st.number_input('Humidity (%)', value=60.0)
+        mean_temp = st.slider('Mean Temperature (°C)', min_value=-50.0, max_value=50.0, value=25.0, step=0.1)
+        max_temp = st.slider('Maximum Temperature (°C)', min_value=-50.0, max_value=50.0, value=30.0, step=0.1)
+        min_temp = st.slider('Minimum Temperature (°C)', min_value=-50.0, max_value=50.0, value=20.0, step=0.1)
+        dew_point = st.slider('Dew Point (°C)', min_value=-50.0, max_value=50.0, value=15.0, step=0.1)
+        humidity = st.slider('Humidity (%)', min_value=0.0, max_value=100.0, value=60.0, step=1.0)
 
     with col2:
-        pressure = st.number_input('Sea Level Pressure (hPa)', value=1013.0)
-        visibility = st.number_input('Visibility (km)', value=10.0)
-        wind_speed = st.number_input('Wind Speed (m/s)', value=5.0)
-        precipitation = st.number_input('Precipitation (mm)', value=0.0)
+        pressure = st.slider('Sea Level Pressure (hPa)', min_value=900.0, max_value=1100.0, value=1013.0, step=0.1)
+        visibility = st.slider('Visibility (km)', min_value=0.0, max_value=50.0, value=10.0, step=0.1)
+        wind_speed = st.slider('Wind Speed (m/s)', min_value=0.0, max_value=50.0, value=5.0, step=0.1)
+        precipitation = st.slider('Precipitation (mm)', min_value=0.0, max_value=500.0, value=0.0, step=0.1)
 
 # Create a DataFrame from user input
 input_data = pd.DataFrame({
