@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import io
 
-# Load the newly trained model
+# Load the trained model
 loaded_model = joblib.load('trained_model.pkl')
 
 # Streamlit app configuration
@@ -47,6 +48,7 @@ st.markdown("Use the sliders in the sidebar to input weather data, then click **
 # Sidebar for input fields
 st.sidebar.header("Input Weather Data")
 
+# Collect user input through sliders
 mean_temp = st.sidebar.slider('Mean Temperature (°C)', min_value=-50.0, max_value=50.0, value=25.0, step=0.1)
 max_temp = st.sidebar.slider('Maximum Temperature (°C)', min_value=-50.0, max_value=50.0, value=30.0, step=0.1)
 min_temp = st.sidebar.slider('Minimum Temperature (°C)', min_value=-50.0, max_value=50.0, value=20.0, step=0.1)
@@ -82,3 +84,49 @@ if st.button('Predict'):
         st.write(f"Predicted value: {prediction[0]}")
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
+# Test data
+test_data_csv = """
+Mean Temperature (°C),Maximum Temperature (°C),Minimum Temperature (°C),Dew Point (°C),Humidity (%),Sea Level Pressure (hPa),Visibility (km),Wind Speed (m/s),Precipitation (mm),Weather Condition
+6.9,21.2,-4.1,8.9,32.5,990.9,1.3,13,60.1,Snow
+21.9,22.2,7.4,18.3,37,992.7,3.7,4.6,52.5,Rain
+9.4,13.8,0.2,-9.4,43.4,1005.6,9.2,11.8,20,Clear
+13.1,22,12.4,9.3,33.6,984.6,19,14.5,80.8,Clear
+3.7,5.2,-6.6,2.6,29.8,1014.7,0.8,13.6,25.9,Rain
+19.8,24.5,12,6.9,34.8,1047.9,15.5,14.1,89.5,Clear
+16.9,30.7,15.6,15.6,23.6,1002.8,7.8,4.1,82.9,Cloudy
+6.1,10.3,-2,-9.4,84.2,985.2,19.7,11.6,19.9,Snow
+-9.8,2.4,-20.4,14.2,81.7,985.2,7.2,1.7,86.3,Cloudy
+18,23,17,-2.6,46,1031.1,12.8,13.3,47.2,Rain
+-4.6,6.1,-16,7.5,81.7,1014.6,10.5,6.4,2.5,Clear
+-5.1,-4.6,-14.6,-2.4,60.7,1043.5,5.1,6.2,75.6,Clear
+0.3,1.5,-4,-8.6,94.4,1036.6,12.7,13.1,80.4,Snow
+-1.6,11.8,-9.7,17.3,91.7,1002.3,2.3,3.4,42.7,Clear
+26.8,39.7,26.7,5.4,53.4,995.5,2.5,5.1,94.3,Snow
+4.5,12.3,-6,-0.5,97.7,1047.4,5.1,7.5,30.1,Rain
+2.8,3.4,-6.3,5.1,24.1,999.5,18.2,3.6,14.5,Rain
+12,26.8,8.4,11.9,80.9,996.6,14.6,5.5,63.2,Rain
+"""
+
+# Convert the CSV string to a DataFrame
+test_data = pd.read_csv(io.StringIO(test_data_csv))
+
+# Initialize the session state to track visibility
+if 'show_test_data' not in st.session_state:
+    st.session_state.show_test_data = False
+
+# Button to show/hide test data
+if st.button('Toggle Test Data'):
+    st.session_state.show_test_data = not st.session_state.show_test_data
+
+# Display test data if toggled
+if st.session_state.show_test_data:
+    st.subheader("Test Data")
+    st.write(test_data)
+else:
+    st.markdown("""
+    <p style='color: #FFFFFF; font-weight: bold;'>
+        <span style='color: #FF0000; font-weight: bold;'>NB: </span> Click the <span style='color: #FF0000; font-weight: bold;'>**Toggle Test Data**</span> button to view the test data. 
+        You can use this data as a reference or input your own custom data points using the sliders in the sidebar.
+    </p>
+    """, unsafe_allow_html=True)
