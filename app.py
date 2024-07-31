@@ -13,7 +13,7 @@ st.set_page_config(page_title="Weather Data Prediction", layout="wide")
 st.markdown("""
     <style>
     .main {
-        background: url('https://cdn.zeebiz.com/sites/default/files/2023/07/04/249475-delhi-weather-today-rain.jpg') no-repeat center center fixed;
+        background: url(' https://media.licdn.com/dms/image/D4E12AQH9v-6Gn2ivnA/article-cover_image-shrink_720_1280/0/1707834341155?e=2147483647&v=beta&t=s28zi8K2G1jIvnNTbhyVD6fkRnqCOJ1VIvv1wGpGkuw') no-repeat center center fixed;
         -webkit-background-size: cover;
         -moz-background-size: cover;
         -o-background-size: cover;
@@ -38,6 +38,7 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #6a46a1;
     }
+        
     </style>
     """, unsafe_allow_html=True)
 
@@ -80,8 +81,8 @@ st.write(input_data)
 if st.button('Predict'):
     try:
         prediction = loaded_model.predict(input_data)
-        st.subheader("Prediction")
-        st.write(f"Predicted value: {prediction[0]}")
+        st.markdown(f"<h2 style='color: white;'>Prediction</h2>", unsafe_allow_html=True)
+        st.markdown(f"<span style='color: white; font-weight: bold;'>Predicted value: {prediction[0]}</span>", unsafe_allow_html=True)
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
