@@ -9,38 +9,55 @@ loaded_model = joblib.load('trained_model.pkl')
 # Streamlit app configuration
 st.set_page_config(page_title="Weather Data Prediction", layout="wide")
 
-# Custom CSS to style the app with a background image
-st.markdown("""
-    <style>
-    .main {
-        background: url(' https://media.licdn.com/dms/image/D4E12AQH9v-6Gn2ivnA/article-cover_image-shrink_720_1280/0/1707834341155?e=2147483647&v=beta&t=s28zi8K2G1jIvnNTbhyVD6fkRnqCOJ1VIvv1wGpGkuw') no-repeat center center fixed;
-        -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover;
-        color: #ffffff;
-    }
-    .sidebar .sidebar-content {
-        background-color: rgba(255, 255, 255, 0.7);
-        padding: 20px;
-        border-radius: 10px;
-    }
-    h1, h2 {
-        color: #f0f0f0;
-        text-shadow: 2px 2px 4px #000000;
-    }
-    .stButton>button {
-        color: #ffffff;
-        background-color: #4b2e83;
-        border-radius: 5px;
-        padding: 10px 20px;
-    }
-    .stButton>button:hover {
-        background-color: #6a46a1;
-    }
-        
-    </style>
-    """, unsafe_allow_html=True)
+# Define background images for different weather conditions
+background_images = {
+    "Clear": "https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/green-field-over-blue-clear-sky-da-kuk.jpg",
+    "Rain": "https://hhsmedia.com/wp-content/uploads/2019/06/rain-3964186_960_720-900x600.jpg",
+    "Snow": "https://imageio.forbes.com/specials-images/imageserve/639c5cdcb6175432cb9a89d7/0x0.jpg?format=jpg&height=900&width=1600&fit=bounds",
+    "Cloudy": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTp-WDgraYvKZXTxAz0r-S85A5YVcGZ4z0p4w&s"
+}
+
+# Default background image
+default_background = "https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/green-field-over-blue-clear-sky-da-kuk.jpg"
+
+# Function to set the background image based on the weather condition
+def set_background(image_url):
+    st.markdown(
+        f"""
+        <style>
+        .main {{
+            background: url('{image_url}') no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            color: #ffffff;
+        }}
+        .sidebar .sidebar-content {{
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }}
+        h1, h2 {{
+            color: #f0f0f0;
+            text-shadow: 2px 2px 4px #000000;
+        }}
+        .stButton>button {{
+            color: #ffffff;
+            background-color: #4b2e83;
+            border-radius: 5px;
+            padding: 10px 20px;
+        }}
+        .stButton>button:hover {{
+            background-color: #6a46a1;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Set default background
+set_background(default_background)
 
 # App title and description
 st.title("🌤️ Weather Data Prediction App")
@@ -81,8 +98,10 @@ st.write(input_data)
 if st.button('Predict'):
     try:
         prediction = loaded_model.predict(input_data)
+        weather_condition = prediction[0]  # Assuming the model predicts the weather condition directly
         st.markdown(f"<h2 style='color: white;'>Prediction</h2>", unsafe_allow_html=True)
-        st.markdown(f"<span style='color: white; font-weight: bold;'>Predicted value: {prediction[0]}</span>", unsafe_allow_html=True)
+        st.markdown(f"<span style='color: white; font-weight: bold;'>Predicted value: {weather_condition}</span>", unsafe_allow_html=True)
+        set_background(background_images.get(weather_condition, default_background))
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
