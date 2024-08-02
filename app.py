@@ -13,7 +13,7 @@ st.set_page_config(page_title="Weather Data Prediction", layout="wide")
 background_images = {
     "Clear": "https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/green-field-over-blue-clear-sky-da-kuk.jpg",
     "Rain": "https://hhsmedia.com/wp-content/uploads/2019/06/rain-3964186_960_720-900x600.jpg",
-    "Snow": "https://imageio.forbes.com/specials-images/imageserve/639c5cdcb6175432cb9a89d7/0x0.jpg?format=jpg&height=900&width=1600&fit=bounds",
+    "Snow": "https://nsidc.org/sites/default/files/images/adam-chang-IWenq-4JHqo-unsplash.jpg",
     "Cloudy": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTp-WDgraYvKZXTxAz0r-S85A5YVcGZ4z0p4w&s"
 }
 
