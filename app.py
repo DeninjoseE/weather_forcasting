@@ -1,13 +1,11 @@
 import streamlit as st
-import pandas as pd
-import joblib
-import io
-
-# Load the trained model
-loaded_model = joblib.load('trained_model.pkl')
+import requests
 
 # Streamlit app configuration
 st.set_page_config(page_title="Weather Data Prediction", layout="wide")
+
+# Weatherbit API key (replace with your own API key)
+API_KEY = "8fcb95aa406943989846fd4511f34d38"
 
 # Define background images for different weather conditions
 background_images = {
@@ -27,29 +25,7 @@ def set_background(image_url):
         <style>
         .main {{
             background: url('{image_url}') no-repeat center center fixed;
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
             background-size: cover;
-            color: #ffffff;
-        }}
-        .sidebar .sidebar-content {{
-            background-color: rgba(255, 255, 255, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-        }}
-        h1, h2 {{
-            color: #f0f0f0;
-            text-shadow: 2px 2px 4px #000000;
-        }}
-        .stButton>button {{
-            color: #ffffff;
-            background-color: #4b2e83;
-            border-radius: 5px;
-            padding: 10px 20px;
-        }}
-        .stButton>button:hover {{
-            background-color: #6a46a1;
         }}
         </style>
         """,
@@ -61,92 +37,65 @@ set_background(default_background)
 
 # App title and description
 st.title("🌤️ Weather Data Prediction App")
-st.markdown("Use the sliders in the sidebar to input weather data, then click **Predict** to see the forecasted value.")
+st.markdown("Enter the city and country code, fetch the weather data, adjust the values using sliders, and predict the weather condition.")
 
 # Sidebar for input fields
-st.sidebar.header("Input Weather Data")
+st.sidebar.header("Input Location")
+city = st.sidebar.text_input('Enter City', value="New York")
+country = st.sidebar.text_input('Enter Country Code (e.g., US)', value="US")
 
-# Collect user input through sliders
-mean_temp = st.sidebar.slider('Mean Temperature (°C)', min_value=-50.0, max_value=50.0, value=25.0, step=0.1)
-max_temp = st.sidebar.slider('Maximum Temperature (°C)', min_value=-50.0, max_value=50.0, value=30.0, step=0.1)
-min_temp = st.sidebar.slider('Minimum Temperature (°C)', min_value=-50.0, max_value=50.0, value=20.0, step=0.1)
-dew_point = st.sidebar.slider('Dew Point (°C)', min_value=-50.0, max_value=50.0, value=15.0, step=0.1)
-humidity = st.sidebar.slider('Humidity (%)', min_value=0.0, max_value=100.0, value=60.0, step=1.0)
-pressure = st.sidebar.slider('Sea Level Pressure (hPa)', min_value=900.0, max_value=1100.0, value=1013.0, step=0.1)
-visibility = st.sidebar.slider('Visibility (km)', min_value=0.0, max_value=50.0, value=10.0, step=0.1)
-wind_speed = st.sidebar.slider('Wind Speed (m/s)', min_value=0.0, max_value=50.0, value=5.0, step=0.1)
-precipitation = st.sidebar.slider('Precipitation (mm)', min_value=0.0, max_value=500.0, value=0.0, step=0.1)
-
-# Create a DataFrame from user input
-input_data = pd.DataFrame({
-    'Mean Temperature (°C)': [mean_temp],
-    'Maximum Temperature (°C)': [max_temp],
-    'Minimum Temperature (°C)': [min_temp],
-    'Dew Point (°C)': [dew_point],
-    'Humidity (%)': [humidity],
-    'Sea Level Pressure (hPa)': [pressure],
-    'Visibility (km)': [visibility],
-    'Wind Speed (m/s)': [wind_speed],
-    'Precipitation (mm)': [precipitation]
-})
-
-# Show input data
-st.subheader("Input Data")
-st.write(input_data)
-
-# Predict and show result
-if st.button('Predict'):
+# Fetch weather data from Weatherbit API
+if st.sidebar.button('Get Weather Data'):
     try:
-        prediction = loaded_model.predict(input_data)
-        weather_condition = prediction[0]  # Assuming the model predicts the weather condition directly
-        st.markdown(f"<h2 style='color: white;'>Prediction</h2>", unsafe_allow_html=True)
-        st.markdown(f"<span style='color: white; font-weight: bold;'>Predicted value: {weather_condition}</span>", unsafe_allow_html=True)
-        set_background(background_images.get(weather_condition, default_background))
+        url = f"https://api.weatherbit.io/v2.0/current?city={city}&country={country}&key={API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        
+        if 'data' in data:
+            # Extract weather information
+            weather = data['data'][0]
+            temp = weather['temp']  # Temperature
+            humidity = weather['rh']  # Humidity
+            pressure = weather['pres']  # Pressure
+            wind_speed = weather['wind_spd']  # Wind Speed
+            weather_condition = weather['weather']['description']  # Weather description
+            
+            # Display fetched weather data
+            st.subheader(f"Weather in {city}, {country}")
+            st.write(f"Current Weather Condition: {weather_condition}")
+            st.write(f"Temperature: {temp} °C")
+            st.write(f"Humidity: {humidity} %")
+            st.write(f"Pressure: {pressure} hPa")
+            st.write(f"Wind Speed: {wind_speed} m/s")
+            
+            # Sliders to adjust values in the sidebar
+            adjusted_temp = st.sidebar.slider("Temperature (°C)", min_value=-50, max_value=50, value=int(temp))
+            adjusted_humidity = st.sidebar.slider("Humidity (%)", min_value=0, max_value=100, value=int(humidity))
+            adjusted_pressure = st.sidebar.slider("Pressure (hPa)", min_value=900, max_value=1100, value=int(pressure))
+            adjusted_wind_speed = st.sidebar.slider("Wind Speed (m/s)", min_value=0, max_value=50, value=int(wind_speed))
+            
+            if st.sidebar.button('Predict Weather Condition'):
+                # Simple logic to predict weather based on user-adjusted values
+                if adjusted_temp > 30 and adjusted_humidity < 40:
+                    predicted_condition = "Clear"
+                elif adjusted_humidity > 80 and adjusted_wind_speed > 10:
+                    predicted_condition = "Rain"
+                elif adjusted_temp < 0:
+                    predicted_condition = "Snow"
+                else:
+                    predicted_condition = "Cloudy"
+                
+                st.subheader(f"Predicted Weather Condition: {predicted_condition}")
+                
+                # Change background based on predicted condition
+                set_background(background_images.get(predicted_condition, default_background))
+        else:
+            st.error("Could not fetch weather data. Please check the city or country code.")
+    
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
-# Test data
-test_data_csv = """
-Mean Temperature (°C),Maximum Temperature (°C),Minimum Temperature (°C),Dew Point (°C),Humidity (%),Sea Level Pressure (hPa),Visibility (km),Wind Speed (m/s),Precipitation (mm),Weather Condition
-6.9,21.2,-4.1,8.9,32.5,990.9,1.3,13,60.1,Snow
-21.9,22.2,7.4,18.3,37,992.7,3.7,4.6,52.5,Rain
-9.4,13.8,0.2,-9.4,43.4,1005.6,9.2,11.8,20,Clear
-13.1,22,12.4,9.3,33.6,984.6,19,14.5,80.8,Clear
-3.7,5.2,-6.6,2.6,29.8,1014.7,0.8,13.6,25.9,Rain
-19.8,24.5,12,6.9,34.8,1047.9,15.5,14.1,89.5,Clear
-16.9,30.7,15.6,15.6,23.6,1002.8,7.8,4.1,82.9,Cloudy
-6.1,10.3,-2,-9.4,84.2,985.2,19.7,11.6,19.9,Snow
--9.8,2.4,-20.4,14.2,81.7,985.2,7.2,1.7,86.3,Cloudy
-18,23,17,-2.6,46,1031.1,12.8,13.3,47.2,Rain
--4.6,6.1,-16,7.5,81.7,1014.6,10.5,6.4,2.5,Clear
--5.1,-4.6,-14.6,-2.4,60.7,1043.5,5.1,6.2,75.6,Clear
-0.3,1.5,-4,-8.6,94.4,1036.6,12.7,13.1,80.4,Snow
--1.6,11.8,-9.7,17.3,91.7,1002.3,2.3,3.4,42.7,Clear
-26.8,39.7,26.7,5.4,53.4,995.5,2.5,5.1,94.3,Snow
-4.5,12.3,-6,-0.5,97.7,1047.4,5.1,7.5,30.1,Rain
-2.8,3.4,-6.3,5.1,24.1,999.5,18.2,3.6,14.5,Rain
-12,26.8,8.4,11.9,80.9,996.6,14.6,5.5,63.2,Rain
-"""
-
-# Convert the CSV string to a DataFrame
-test_data = pd.read_csv(io.StringIO(test_data_csv))
-
-# Initialize the session state to track visibility
-if 'show_test_data' not in st.session_state:
-    st.session_state.show_test_data = False
-
-# Button to show/hide test data
-if st.button('Toggle Test Data'):
-    st.session_state.show_test_data = not st.session_state.show_test_data
-
-# Display test data if toggled
-if st.session_state.show_test_data:
-    st.subheader("Test Data")
-    st.write(test_data)
-else:
-    st.markdown("""
-    <p style='color: #FFFFFF; font-weight: bold;'>
-        <span style='color: #FF0000; font-weight: bold;'>NB: </span> Click the <span style='color: #FF0000; font-weight: bold;'>**Toggle Test Data**</span> button to view the test data. 
-        You can use this data as a reference or input your own custom data points using the sliders in the sidebar.
-    </p>
-    """, unsafe_allow_html=True)
+# Additional information on Weatherbit API
+st.markdown("""
+    **Note:** Ensure that the city and country code are valid.
+""")
