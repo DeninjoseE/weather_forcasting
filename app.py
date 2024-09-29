@@ -41,8 +41,8 @@ st.markdown("Enter the city and country code, fetch the weather data, adjust the
 
 # Sidebar for input fields
 st.sidebar.header("Input Location")
-city = st.sidebar.text_input('Enter City', value="New York")
-country = st.sidebar.text_input('Enter Country Code (e.g., US)', value="US")
+city = st.sidebar.text_input('Enter City', value="KUTTIKANAM")
+country = st.sidebar.text_input('Enter Country Code (e.g., IN)', value="IN")
 
 # Fetch weather data from Weatherbit API
 if st.sidebar.button('Get Weather Data'):
@@ -60,13 +60,18 @@ if st.sidebar.button('Get Weather Data'):
             wind_speed = weather['wind_spd']  # Wind Speed
             weather_condition = weather['weather']['description']  # Weather description
             
-            # Display fetched weather data
-            st.subheader(f"Weather in {city}, {country}")
-            st.write(f"Current Weather Condition: {weather_condition}")
-            st.write(f"Temperature: {temp} °C")
-            st.write(f"Humidity: {humidity} %")
-            st.write(f"Pressure: {pressure} hPa")
-            st.write(f"Wind Speed: {wind_speed} m/s")
+            # Set background color using st.markdown with HTML and CSS
+            st.markdown(f"""
+                <div style="background-color: #e0e0e0; padding: 10px; border-radius: 10px;">
+                    <h3 style="text-align: center;">Weather in {city}, {country}</h3>
+                    <p>Current Weather Condition: {weather_condition}</p>
+                    <p>Temperature: {temp} °C</p>
+                    <p>Humidity: {humidity} %</p>
+                    <p>Pressure: {pressure} hPa</p>
+                    <p>Wind Speed: {wind_speed} m/s</p>
+                </div>
+            """, unsafe_allow_html=True)
+
             
             # Sliders to adjust values in the sidebar
             adjusted_temp = st.sidebar.slider("Temperature (°C)", min_value=-50, max_value=50, value=int(temp))
