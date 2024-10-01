@@ -1,11 +1,9 @@
 import streamlit as st
-import requests
+import pandas as pd
+import joblib
 
-# Streamlit app configuration
-st.set_page_config(page_title="Weather Data Prediction", layout="wide")
-
-# Weatherbit API key (replace with your own API key)
-API_KEY = "8fcb95aa406943989846fd4511f34d38"
+# Load the trained model
+loaded_model = joblib.load('trained_model.pkl')
 
 # Define background images for different weather conditions
 background_images = {
@@ -18,89 +16,77 @@ background_images = {
 # Default background image
 default_background = "https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/green-field-over-blue-clear-sky-da-kuk.jpg"
 
-# Function to set the background image based on the weather condition
+# Function to set background image
 def set_background(image_url):
     st.markdown(
         f"""
         <style>
-        .main {{
-            background: url('{image_url}') no-repeat center center fixed;
+        .stApp {{
+            background-image: url({image_url});
             background-size: cover;
+            background-position: center;
         }}
         </style>
         """,
         unsafe_allow_html=True
     )
 
-# Set default background
-set_background(default_background)
+# Streamlit app configuration
+st.set_page_config(page_title="Weather Data Prediction", layout="wide")
+st.title("Weather Data Prediction App")
 
-# App title and description
-st.title("🌤️ Weather Data Prediction App")
-st.markdown("Enter the city and country code, fetch the weather data, adjust the values using sliders, and predict the weather condition.")
-
-# Sidebar for input fields
-st.sidebar.header("Input Location")
-city = st.sidebar.text_input('Enter City', value="KUTTIKANAM")
-country = st.sidebar.text_input('Enter Country Code (e.g., IN)', value="IN")
-
-# Fetch weather data from Weatherbit API
-if st.sidebar.button('Get Weather Data'):
-    try:
-        url = f"https://api.weatherbit.io/v2.0/current?city={city}&country={country}&key={API_KEY}"
-        response = requests.get(url)
-        data = response.json()
-        
-        if 'data' in data:
-            # Extract weather information
-            weather = data['data'][0]
-            temp = weather['temp']  # Temperature
-            humidity = weather['rh']  # Humidity
-            pressure = weather['pres']  # Pressure
-            wind_speed = weather['wind_spd']  # Wind Speed
-            weather_condition = weather['weather']['description']  # Weather description
-            
-            # Set background color using st.markdown with HTML and CSS
-            st.markdown(f"""
-                <div style="background-color: #e0e0e0; padding: 10px; border-radius: 10px;">
-                    <h3 style="text-align: center;">Weather in {city}, {country}</h3>
-                    <p>Current Weather Condition: {weather_condition}</p>
-                    <p>Temperature: {temp} °C</p>
-                    <p>Humidity: {humidity} %</p>
-                    <p>Pressure: {pressure} hPa</p>
-                    <p>Wind Speed: {wind_speed} m/s</p>
-                </div>
-            """, unsafe_allow_html=True)
-
-            
-            # Sliders to adjust values in the sidebar
-            adjusted_temp = st.sidebar.slider("Temperature (°C)", min_value=-50, max_value=50, value=int(temp))
-            adjusted_humidity = st.sidebar.slider("Humidity (%)", min_value=0, max_value=100, value=int(humidity))
-            adjusted_pressure = st.sidebar.slider("Pressure (hPa)", min_value=900, max_value=1100, value=int(pressure))
-            adjusted_wind_speed = st.sidebar.slider("Wind Speed (m/s)", min_value=0, max_value=50, value=int(wind_speed))
-            
-            if st.sidebar.button('Predict Weather Condition'):
-                # Simple logic to predict weather based on user-adjusted values
-                if adjusted_temp > 30 and adjusted_humidity < 40:
-                    predicted_condition = "Clear"
-                elif adjusted_humidity > 80 and adjusted_wind_speed > 10:
-                    predicted_condition = "Rain"
-                elif adjusted_temp < 0:
-                    predicted_condition = "Snow"
-                else:
-                    predicted_condition = "Cloudy"
-                
-                st.subheader(f"Predicted Weather Condition: {predicted_condition}")
-                
-                # Change background based on predicted condition
-                set_background(background_images.get(predicted_condition, default_background))
-        else:
-            st.error("Could not fetch weather data. Please check the city or country code.")
+# Create a container for input fields with two columns
+with st.container():
+    st.header("Input Weather Data")
     
+    col1, col2 = st.columns(2)
+
+    # Column 1 for the first set of inputs
+    with col1:
+        mean_temp = st.slider('Mean Temperature (°C)', min_value=-50.0, max_value=50.0, value=25.0)
+        max_temp = st.slider('Maximum Temperature (°C)', min_value=-50.0, max_value=50.0, value=30.0)
+        min_temp = st.slider('Minimum Temperature (°C)', min_value=-50.0, max_value=50.0, value=20.0)
+        dew_point = st.slider('Dew Point (°C)', min_value=-50.0, max_value=50.0, value=15.0)
+        humidity = st.slider('Humidity (%)', min_value=0, max_value=100, value=60)
+
+    # Column 2 for the second set of inputs
+    with col2:
+        pressure = st.slider('Sea Level Pressure (hPa)', min_value=950.0, max_value=1050.0, value=1013.0)
+        visibility = st.slider('Visibility (km)', min_value=0.0, max_value=100.0, value=10.0)
+        wind_speed = st.slider('Wind Speed (m/s)', min_value=0.0, max_value=50.0, value=5.0)
+        precipitation = st.slider('Precipitation (mm)', min_value=0.0, max_value=500.0, value=0.0)
+
+# Create a DataFrame from user input
+input_data = pd.DataFrame({
+    'Mean Temperature (°C)': [mean_temp],
+    'Maximum Temperature (°C)': [max_temp],
+    'Minimum Temperature (°C)': [min_temp],
+    'Dew Point (°C)': [dew_point],
+    'Humidity (%)': [humidity],
+    'Sea Level Pressure (hPa)': [pressure],
+    'Visibility (km)': [visibility],
+    'Wind Speed (m/s)': [wind_speed],
+    'Precipitation (mm)': [precipitation]
+})
+
+# Display input data
+st.subheader("Input Data")
+st.write(input_data)
+
+# Predict and show result when the button is clicked
+if st.button('Predict'):
+    try:
+        # Prediction using the loaded model
+        prediction = loaded_model.predict(input_data)
+
+        # Assume that the prediction output is a weather condition (e.g., "Clear", "Rain", etc.)
+        weather_condition = prediction[0]  # Example: 'Clear'
+
+        # Set the background image based on the weather condition
+        background_image = background_images.get(weather_condition, default_background)
+        set_background(background_image)
+
+        st.subheader("Prediction")
+        st.write(f"Predicted weather condition: {weather_condition}")
     except Exception as e:
         st.error(f"An error occurred: {e}")
-
-# Additional information on Weatherbit API
-st.markdown("""
-    **Note:** Ensure that the city and country code are valid.
-""")
