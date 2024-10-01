@@ -41,6 +41,12 @@ def set_background(image_url):
             padding: 10px;
             border-radius: 8px;
         }}
+        .text-container {{
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }}
         .stButton button {{
             background-color: #4CAF50;
             color: white;
@@ -104,7 +110,9 @@ input_data = pd.DataFrame({
 
 # Display input data
 st.subheader("Your Input Data:")
+st.markdown('<div class="text-container">', unsafe_allow_html=True)
 st.write(input_data)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Predict and show result when the button is clicked
 if st.button('🌧️ Predict Weather Condition'):
@@ -120,6 +128,8 @@ if st.button('🌧️ Predict Weather Condition'):
         set_background(background_image)
 
         st.subheader("Prediction")
+        st.markdown('<div class="text-container">', unsafe_allow_html=True)
         st.write(f"🌤️ Predicted weather condition: **{weather_condition}**")
+        st.markdown('</div>', unsafe_allow_html=True)
     except Exception as e:
         st.error(f"An error occurred: {e}")
