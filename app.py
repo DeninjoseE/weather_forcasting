@@ -25,6 +25,33 @@ def set_background(image_url):
             background-image: url({image_url});
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
+        }}
+        h1 {{
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            text-shadow: 2px 2px 8px #000000;
+        }}
+        h2, h3 {{
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+        }}
+        .container {{
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+        }}
+        .stButton button {{
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 24px;
+            text-align: center;
+            font-size: 16px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }}
+        .stButton button:hover {{
+            background-color: #45a049;
         }}
         </style>
         """,
@@ -33,12 +60,16 @@ def set_background(image_url):
 
 # Streamlit app configuration
 st.set_page_config(page_title="Weather Data Prediction", layout="wide")
-st.title("Weather Data Prediction App")
+st.title("🌤️ Weather Data Prediction App")
 
-# Create a container for input fields with two columns
+# Set the default background image
+set_background(default_background)
+
+# Create a container for input fields with styling
 with st.container():
+    st.markdown('<div class="container">', unsafe_allow_html=True)
     st.header("Input Weather Data")
-    
+
     col1, col2 = st.columns(2)
 
     # Column 1 for the first set of inputs
@@ -56,6 +87,8 @@ with st.container():
         wind_speed = st.slider('Wind Speed (m/s)', min_value=0.0, max_value=50.0, value=5.0)
         precipitation = st.slider('Precipitation (mm)', min_value=0.0, max_value=500.0, value=0.0)
 
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # Create a DataFrame from user input
 input_data = pd.DataFrame({
     'Mean Temperature (°C)': [mean_temp],
@@ -70,11 +103,11 @@ input_data = pd.DataFrame({
 })
 
 # Display input data
-st.subheader("Input Data")
+st.subheader("Your Input Data:")
 st.write(input_data)
 
 # Predict and show result when the button is clicked
-if st.button('Predict'):
+if st.button('🌧️ Predict Weather Condition'):
     try:
         # Prediction using the loaded model
         prediction = loaded_model.predict(input_data)
@@ -87,6 +120,6 @@ if st.button('Predict'):
         set_background(background_image)
 
         st.subheader("Prediction")
-        st.write(f"Predicted weather condition: {weather_condition}")
+        st.write(f"🌤️ Predicted weather condition: **{weather_condition}**")
     except Exception as e:
         st.error(f"An error occurred: {e}")
