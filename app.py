@@ -71,29 +71,19 @@ st.title("🌤️ Weather Data Prediction App")
 # Set the default background image
 set_background(default_background)
 
-# Create a container for input fields with styling
-with st.container():
-    st.markdown('<div class="container">', unsafe_allow_html=True)
-    st.header("Input Weather Data")
+# Sidebar for input fields
+st.sidebar.header("Input Weather Data")
 
-    col1, col2 = st.columns(2)
-
-    # Column 1 for the first set of inputs
-    with col1:
-        mean_temp = st.slider('Mean Temperature (°C)', min_value=-50.0, max_value=50.0, value=25.0)
-        max_temp = st.slider('Maximum Temperature (°C)', min_value=-50.0, max_value=50.0, value=30.0)
-        min_temp = st.slider('Minimum Temperature (°C)', min_value=-50.0, max_value=50.0, value=20.0)
-        dew_point = st.slider('Dew Point (°C)', min_value=-50.0, max_value=50.0, value=15.0)
-        humidity = st.slider('Humidity (%)', min_value=0, max_value=100, value=60)
-
-    # Column 2 for the second set of inputs
-    with col2:
-        pressure = st.slider('Sea Level Pressure (hPa)', min_value=950.0, max_value=1050.0, value=1013.0)
-        visibility = st.slider('Visibility (km)', min_value=0.0, max_value=100.0, value=10.0)
-        wind_speed = st.slider('Wind Speed (m/s)', min_value=0.0, max_value=50.0, value=5.0)
-        precipitation = st.slider('Precipitation (mm)', min_value=0.0, max_value=500.0, value=0.0)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+# Input sliders in the sidebar
+mean_temp = st.sidebar.slider('Mean Temperature (°C)', min_value=-50.0, max_value=50.0, value=25.0)
+max_temp = st.sidebar.slider('Maximum Temperature (°C)', min_value=-50.0, max_value=50.0, value=30.0)
+min_temp = st.sidebar.slider('Minimum Temperature (°C)', min_value=-50.0, max_value=50.0, value=20.0)
+dew_point = st.sidebar.slider('Dew Point (°C)', min_value=-50.0, max_value=50.0, value=15.0)
+humidity = st.sidebar.slider('Humidity (%)', min_value=0, max_value=100, value=60)
+pressure = st.sidebar.slider('Sea Level Pressure (hPa)', min_value=950.0, max_value=1050.0, value=1013.0)
+visibility = st.sidebar.slider('Visibility (km)', min_value=0.0, max_value=100.0, value=10.0)
+wind_speed = st.sidebar.slider('Wind Speed (m/s)', min_value=0.0, max_value=50.0, value=5.0)
+precipitation = st.sidebar.slider('Precipitation (mm)', min_value=0.0, max_value=500.0, value=0.0)
 
 # Create a DataFrame from user input
 input_data = pd.DataFrame({
@@ -108,14 +98,14 @@ input_data = pd.DataFrame({
     'Precipitation (mm)': [precipitation]
 })
 
-# Display input data
+# Display input data in the main area
 st.subheader("Your Input Data:")
 st.markdown('<div class="text-container">', unsafe_allow_html=True)
 st.write(input_data)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Predict and show result when the button is clicked
-if st.button('🌧️ Predict Weather Condition'):
+if st.sidebar.button('🌧️ Predict Weather Condition'):
     try:
         # Prediction using the loaded model
         prediction = loaded_model.predict(input_data)
